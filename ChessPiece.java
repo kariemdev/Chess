@@ -77,6 +77,7 @@ public abstract class ChessPiece extends JLabel {
                 newLocation.translate(-mouseOffset.x-5, -mouseOffset.y-20);
                 setLocation(newLocation);
                 System.out.println(e.getLocationOnScreen());
+                printTIles();
 
             }
         });
@@ -116,8 +117,6 @@ public abstract class ChessPiece extends JLabel {
         int x = this.x;
         int y = this.y;
         switch (this.getTypePiece()) {
-
-
             case "Queen":
                 directions = new int[][]
                         {{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
@@ -137,70 +136,53 @@ public abstract class ChessPiece extends JLabel {
             case "King":
                 directions = new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
                 break;
-            /*
+
             case "Pawn":
                 ArrayList < int[]> directionsList = new ArrayList<>() ;
-                if (this.color.equals("white"))
+                if (this.color.equals("black"))
                 {
 
-                    if (y < 7 && game.tileReference[x][y+1].hasPiece() == false)
+                    if (y < 7 && game.getTileReference()[this.y+1][this.x].hasPiece() != true )
                     {
                         directionsList.add(new int[] { 0, 1 });
                     }
-                    if ( this.firstMove == true &&  game.tileReference[x][y+2].hasPiece() == false )
-                    {
-                        directionsList.add(new int[] { 0, 2 });
-                    }
-                    if (pawnDiagMove(((int)transform.position.x) + 1, ((int)transform.position.y) + 1))
-                    {
-                        directionsList.Add(new int[] { 1, 1 });
-                    }
-                    if (pawnDiagMove(((int)transform.position.x) - 1, ((int)transform.position.y) + 1))
-                    {
-                        directionsList.Add(new int[] { -1, 1 });
-                    }
 
-                    if (directionsList.Count !=0 )
+                    if (checkPawnDiagMove(this.x + 1 , this.y + 1))
                     {
-                        directions = ConvertListToRectangularArray(directionsList);
+                        directionsList.add(new int[] { 1, 1 });
                     }
+                    if (checkPawnDiagMove( this.x - 1, this.y + 1))
+                    {
+                        directionsList.add(new int[] { -1, 1 });
+                    }
+                    directions = convertArrayListTo2DArray(directionsList);
+
 
                 }
                 else
                 {
-                    if (y > 0 && gdr.board[x , y -1].hasPiece() != true)
+                    if (y > 0 && game.getTileReference()[this.y-1 ][this.x].hasPiece() != true)
                     {
-                        directionsList.Add( new int[]  { 0, -1 } );
+                        directionsList.add( new int[]  { 0, -1 } );
+                    }
+                    if (checkPawnDiagMove( this.x- 1, this.y- 1))
+                    {
+                        directionsList.add(new int[]  { -1, -1 } );
+                    }
+                    if (checkPawnDiagMove(this.x+ 1 , this.y - 1))
+                    {
+                        directionsList.add(new int[]  { 1, -1 } );
                     }
 
-                    if (this.firstMove == true && gdr.board[x,y-2].hasPiece() == false )
-                    {
-                        directionsList.Add(new int[] { 0, -2 });
-                    }
-                    if (pawnDiagMove(((int)transform.position.x) - 1, ((int)transform.position.y) - 1))
-                    {
-                        directionsList.Add(new int[]  { -1, -1 } );
-
-
-                    }
-                    if (pawnDiagMove(((int)transform.position.x) + 1 , ((int)transform.position.y) - 1))
-                    {
-                        directionsList.Add(new int[]  { 1, -1 } );
-                    }
-                    if (directionsList.Count != 0 )
-                    {
-                        directions = ConvertListToRectangularArray(directionsList);
-                    }
-
-
+                    directions = convertArrayListTo2DArray(directionsList);
 
                 }
-                break;*/
+                break;
             default:
                 System.out.println("Error");
                 break;
         }
-
+        if(directions !=null){
         int directionsCount = directions.length;
         for (int i = 0; i < directionsCount; i++) {
             int dx = directions[i][0];
@@ -208,33 +190,43 @@ public abstract class ChessPiece extends JLabel {
             int new_x = x + dx;
             int new_y = y + dy;
 
+
             do {
 
-                if(new_x>=0 && new_x<8 && new_y>=0 && new_y<8) {
+                if(ifInBounds(new_x , new_y) && !ifHasSameColorPiece(new_x ,new_y) ) {
                     moves.add(game.getTiles()[new_x][new_y]);
 
-                    if (game.getTiles()[new_x][new_y].hasPiece()) {
+                }
+
+                    if (ifInBounds(new_x , new_y) && game.getTiles()[new_y][new_x].hasPiece()) {
                         break;
                     }
-                }
 
 
                 new_x += dx;
                 new_y += dy;
-                System.out.println(this.getTypePiece().equals("Bishop"));
-            } while ((new_x>=0 && new_x<8 && new_y>=0 && new_y<8 ) &&(this.getTypePiece().equals("Queen") || this.getTypePiece().equals("Rook")  ||this.getTypePiece().equals("Bishop")));
 
-
-        }
-
+            } while ((ifInBounds(new_x , new_y)) &&(this.getTypePiece().equals("Queen") || this.getTypePiece().equals("Rook")  ||this.getTypePiece().equals("Bishop")));
+        }}
         return moves;
-
-
-
-
     }
 
+    public static int[][] convertArrayListTo2DArray(ArrayList<int[]> arrayList) {
+        int numRows = arrayList.size();
+        if(numRows ==0 )
+            return null;
+        int numCols = arrayList.get(0).length;
 
+        int[][] twoDArray = new int[numRows][numCols];
+
+        for (int row = 0; row < numRows; row++) {
+            for (int col = 0; col < numCols; col++) {
+                twoDArray[row][col] = arrayList.get(row)[col];
+            }
+        }
+
+        return twoDArray;
+    }
 
     public String getColor(){return this.color;}
     public void setX(int x){this.x = x;}
@@ -256,6 +248,47 @@ public abstract class ChessPiece extends JLabel {
 
 
     }
+    public boolean checkPawnDiagMove(int x , int y ){
+        if(this.color.equals("white")){
 
+            if(ifInBounds(x , y ) && game.getTileReference()[y][x].hasPiece() && game.getTileReference()[y][x].getPiece().getColor().equals("black")){
+                return true ;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            if(ifInBounds(x , y ) && game.getTileReference()[y][x].hasPiece() && game.getTileReference()[y][x].getPiece().getColor().equals("white")){
+                return true ;}
+            else {
+                return false;
+            }
+
+        }
+
+    }
+    public boolean ifInBounds(int x , int y){
+        if(x < 8 && x>=0 && y<8 && y>=0)
+            return true;
+        return false ;
+
+    }
+    public boolean ifHasSameColorPiece(int x , int y ){
+        if(game.getTileReference()[y][x].hasPiece() && game.getTileReference()[y][x].getPiece().getColor().equals(this.color) )
+            return true ;
+        else
+            return false ;
+    }
+    public  void printTIles(){
+        ChessTile [][] board = game.getTileReference();
+        for(int i = 0 ; i<8 ; i++){
+            for(int j = 0 ; j<8 ;j++){
+                System.out.print(board[i][j].hasPiece() + "  -   " );
+            }
+            System.out.println();
+        }
+
+    }
 
 }
