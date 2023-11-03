@@ -7,6 +7,7 @@ public class King extends ChessPiece {
     private boolean isKingUnderThreat;
 
 
+
     public King(String color ){
         super(color , "King");
         if (color.equals("black")) {

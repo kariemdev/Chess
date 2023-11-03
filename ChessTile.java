@@ -44,17 +44,6 @@ public class ChessTile extends JPanel {
 
     }
 
-
-
-
-
-
-
-
-
-
-
-
     public int getXLocation(){return this.j;}
     public int geYLocation(){return this.i;}
     public boolean hasPiece(){return this.hasPiece;}
@@ -63,9 +52,11 @@ public class ChessTile extends JPanel {
     public int getYCords(){return this.i ;}
     public int geXCords(){return this.j ;}
     public void removePiece(){
+        game.getBoard().remove(this.piece);
         this.piece = null ;
         this.hasPiece = false ;
     }
+
 
 
 }

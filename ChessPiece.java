@@ -29,45 +29,44 @@ public abstract class ChessPiece extends JLabel {
                 System.out.println(y + "gg" + x);
                 mouseOffset = e.getPoint();
                 previousPos = getLocation();
-
                 game.getBoard().setTilesCircle(generateMoves());
                 game.getBoard().setDrawCircle(true);
+                updateKingThreats();
+
+
 
             }
             public void mouseReleased(MouseEvent e ){
                 Point newLocation = e.getLocationOnScreen();
                 // Snap the child component to the nearest square
                 int x = roundUpX(newLocation.x) /  50;
-                 int y = roundUpY(newLocation.y) / 45;
-                 System.out.println(x);
-
-
+                int y = roundUpY(newLocation.y) / 45;
                 if(newLocation.x > 400 || newLocation.x<0 || newLocation.y>380 || newLocation.y<0){
                     setLocation(previousPos);
                 }
                 else {
                     if(x<8 && x>=0 && y<8 && y>=0 && generateMoves().contains(game.getTileReference()[x][y])){
                      int x1 = roundUpX(newLocation.x) + 2; // Snap to the nearest column
-                     int y1 = roundUpY(newLocation.y - 25) + 3; //Snap to the nearest rowmo
-
+                     int y1 = roundUpY(newLocation.y - 25) + 3; //Snap to the nearest rowm
+                     if(ifHasOppositeColorPiece(x,y) ) {
+                        ChessPiece piece =  game.getTileReference()[y][x].getPiece();
+                        game.getTileReference()[y][x].removePiece();
+                        game.getBoard().revalidate();
+                     }
                      setLocation(x1, y1);
                      movePiece(y,x);
-
-
+                     if(ifKingThreat()) {
+                         setLocation(previousPos);
+                         movePiece(previousPos.y , previousPos.x);
+                     }
                     }
                     else{
                         setLocation(previousPos);
                     }
-
             }
-
                 game.getBoard().setTilesCircle(null);
                 game.getBoard().repaint();
             }
-
-
-
-
         });
         addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -76,8 +75,7 @@ public abstract class ChessPiece extends JLabel {
                 Point newLocation = e.getLocationOnScreen();
                 newLocation.translate(-mouseOffset.x-5, -mouseOffset.y-20);
                 setLocation(newLocation);
-                System.out.println(e.getLocationOnScreen());
-                printTIles();
+                checkKingThreat();
 
             }
         });
@@ -194,6 +192,10 @@ public abstract class ChessPiece extends JLabel {
             do {
 
                 if(ifInBounds(new_x , new_y) && !ifHasSameColorPiece(new_x ,new_y) ) {
+                    if( game.getTiles()[new_y][new_x].hasPiece() && game.getTileReference()[new_y][new_x].getPiece().getTypePiece().equals("King")){
+                        System.out.println("Threat on King detected");
+                        ((King) game.getTileReference()[new_y][new_x].getPiece()).setKingUnderThreat(true);
+                    }
                     moves.add(game.getTiles()[new_x][new_y]);
 
                 }
@@ -210,6 +212,113 @@ public abstract class ChessPiece extends JLabel {
         }}
         return moves;
     }
+    public boolean checkKingThreat() {
+
+        ArrayList<ChessTile> moves = new ArrayList<>();
+        int[][] directions = {};
+        int x = this.x;
+        int y = this.y;
+        boolean flag = false ;
+        switch (this.getTypePiece()) {
+            case "Queen":
+                directions = new int[][]
+                        {{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+                break;
+            case "Knight":
+
+                directions = new int[][]{
+                        {-2, 1}, {-1, 2}, {1, 2}, {2, 1}, {-2, -1}, {-1, -2}, {1, -2}, {2, -1}};
+                break;
+            case "Bishop":
+                directions = new int[][]
+                        {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+                break;
+            case "Rook":
+                directions = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+                break;
+            case "King":
+                directions = new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+                break;
+
+            case "Pawn":
+                ArrayList < int[]> directionsList = new ArrayList<>() ;
+                if (this.color.equals("black"))
+                {
+
+                    if (y < 7 && game.getTileReference()[this.y+1][this.x].hasPiece() != true )
+                    {
+                        directionsList.add(new int[] { 0, 1 });
+                    }
+
+                    if (checkPawnDiagMove(this.x + 1 , this.y + 1))
+                    {
+                        directionsList.add(new int[] { 1, 1 });
+                    }
+                    if (checkPawnDiagMove( this.x - 1, this.y + 1))
+                    {
+                        directionsList.add(new int[] { -1, 1 });
+                    }
+                    directions = convertArrayListTo2DArray(directionsList);
+
+
+                }
+                else
+                {
+                    if (y > 0 && game.getTileReference()[this.y-1 ][this.x].hasPiece() != true)
+                    {
+                        directionsList.add( new int[]  { 0, -1 } );
+                    }
+                    if (checkPawnDiagMove( this.x- 1, this.y- 1))
+                    {
+                        directionsList.add(new int[]  { -1, -1 } );
+                    }
+                    if (checkPawnDiagMove(this.x+ 1 , this.y - 1))
+                    {
+                        directionsList.add(new int[]  { 1, -1 } );
+                    }
+
+                    directions = convertArrayListTo2DArray(directionsList);
+
+                }
+                break;
+            default:
+                System.out.println("Error");
+                break;
+        }
+        if(directions !=null){
+            int directionsCount = directions.length;
+            for (int i = 0; i < directionsCount; i++) {
+                int dx = directions[i][0];
+                int dy = directions[i][1];
+                int new_x = x + dx;
+                int new_y = y + dy;
+
+
+                do {
+
+                    if(ifInBounds(new_x , new_y) && !ifHasSameColorPiece(new_x ,new_y) ) {
+                        if( game.getTiles()[new_y][new_x].hasPiece() && game.getTileReference()[new_y][new_x].getPiece().getTypePiece().equals("King")){
+                            flag = true;
+                            ((King) game.getTileReference()[new_y][new_x].getPiece()).setKingUnderThreat(true);
+
+                        }
+                        moves.add(game.getTiles()[new_x][new_y]);
+
+                    }
+
+                    if (ifInBounds(new_x , new_y) && game.getTiles()[new_y][new_x].hasPiece()) {
+                        break;
+                    }
+
+
+                    new_x += dx;
+                    new_y += dy;
+
+                } while ((ifInBounds(new_x , new_y)) &&(this.getTypePiece().equals("Queen") || this.getTypePiece().equals("Rook")  ||this.getTypePiece().equals("Bishop")));
+            }}
+        return flag;
+    }
+
 
     public static int[][] convertArrayListTo2DArray(ArrayList<int[]> arrayList) {
         int numRows = arrayList.size();
@@ -280,6 +389,12 @@ public abstract class ChessPiece extends JLabel {
         else
             return false ;
     }
+    public boolean ifHasOppositeColorPiece(int x , int y ){
+        if(game.getTileReference()[y][x].hasPiece() && !game.getTileReference()[y][x].getPiece().getColor().equals(this.color) ){
+            return  true ;
+        }
+        return false ;
+    }
     public  void printTIles(){
         ChessTile [][] board = game.getTileReference();
         for(int i = 0 ; i<8 ; i++){
@@ -289,6 +404,21 @@ public abstract class ChessPiece extends JLabel {
             System.out.println();
         }
 
+    }
+    public void updateKingThreats(){
+        for(ChessPiece piece : game.getWhitePieces()){
+            piece.checkKingThreat();
+        }
+        for(ChessPiece piece :game.getBlackPieces()){
+            piece.checkKingThreat();
+        }
+
+    }
+    public  boolean ifKingThreat(){
+        if(this.color.equals("black"))
+            return game.getBlackKing().ifKingUnderThreat();
+        else
+            return game.getWhiteKing().ifKingUnderThreat();
     }
 
 }

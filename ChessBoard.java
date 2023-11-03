@@ -17,6 +17,8 @@ public class ChessBoard extends JFrame {
     private ArrayList<ChessPiece> blackPieces = new ArrayList<>();
     private int cellWidth = 50;
     private int cellHeight = 45;
+    private King whiteKing;
+    private King blackKing;
 
 
 
@@ -29,7 +31,6 @@ public class ChessBoard extends JFrame {
             this.frame.add(board);
             this.board.setLayout(null);
             this.frame.setResizable(false);
-
             this.frame.revalidate();
 
         }
@@ -61,14 +62,9 @@ public class ChessBoard extends JFrame {
     public void chessPiecesINIT(ChessBoard game){
         for(int i = 0; i<8 ; i++){
             this.tileReference[1][i].setPiece(new Pawn("black"));
-
         }
-
         for(int i = 0 ; i<8 ; i++){
             this.tileReference[6][i].setPiece(new Pawn("white"));
-
-
-
         }
 
         this.tileReference[7][0].setPiece(new Rook("white"));
@@ -89,8 +85,11 @@ public class ChessBoard extends JFrame {
         this.tileReference[0][3].setPiece(new Queen("black"));
         this.tileReference[7][3].setPiece(new Queen("white"));
 
-        this.tileReference[0][4].setPiece(new King("black"));
-        this.tileReference[7][4].setPiece(new King("white"));
+
+         this.blackKing = new King("black");
+         this.whiteKing = new King("white");
+         this.tileReference[0][4].setPiece(blackKing);
+         this.tileReference[7][4].setPiece(whiteKing);
 
 
 
@@ -125,7 +124,11 @@ public class ChessBoard extends JFrame {
     public ChessTiles getBoard(){return this.board;}
     public ChessTile [][] getTileReference(){return this.tileReference;}
 
+    public King getWhiteKing() {
+        return whiteKing;
+    }
 
-
-
+    public King getBlackKing() {
+        return blackKing;
+    }
 }
