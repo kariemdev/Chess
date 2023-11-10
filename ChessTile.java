@@ -56,6 +56,10 @@ public class ChessTile extends JPanel {
         this.piece = null ;
         this.hasPiece = false ;
     }
+    public void removePieceSim(){
+        this.piece = null;
+        this.hasPiece = false ;
+    }
 
 
 

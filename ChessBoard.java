@@ -108,12 +108,7 @@ public class ChessBoard extends JFrame {
     public int getCellWidth(){return this.cellWidth; }
     public int getCellHeight(){return this.cellHeight; }
     public void placePiece(ChessPiece piece , int y , int x ){
-
         tileReference[y][x].setPiece(piece);
-
-
-
-
     }
     public ArrayList<ChessPiece> getWhitePieces( ){
         return this.whitePieces;

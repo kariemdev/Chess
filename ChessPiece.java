@@ -55,16 +55,12 @@ public abstract class ChessPiece extends JLabel {
                      }
                      setLocation(x1, y1);
                      movePiece(y,x);
-                     if(ifKingThreat()) {
-                         setLocation(previousPos);
-                         movePiece(previousPos.y , previousPos.x);
-                     }
                     }
                     else{
                         setLocation(previousPos);
                     }
             }
-                game.getBoard().setTilesCircle(null);
+                game.getBoard().setTilesCircle(null); //removes
                 game.getBoard().repaint();
             }
         });
