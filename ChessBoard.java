@@ -19,6 +19,7 @@ public class ChessBoard extends JFrame {
     private int cellHeight = 45;
     private King whiteKing;
     private King blackKing;
+    public static Point windowPos ;
 
 
 
@@ -30,8 +31,10 @@ public class ChessBoard extends JFrame {
             this.frame.setLayout(new BorderLayout());
             this.frame.add(board);
             this.board.setLayout(null);
-            this.frame.setResizable(false);
+            this.frame.setResizable(true);
             this.frame.revalidate();
+            windowPos = this.frame.getLocation();
+            System.out.println(windowPos);
 
         }
 
@@ -50,6 +53,7 @@ public class ChessBoard extends JFrame {
             for(int j = 0 ; j<8 ; j++){
                     ChessTile tile = new ChessTile(game , i , j   );
                     tileReference[i][j] = tile;
+
 
                 }
         }
@@ -122,6 +126,7 @@ public class ChessBoard extends JFrame {
     public King getWhiteKing() {
         return whiteKing;
     }
+
 
     public King getBlackKing() {
         return blackKing;

@@ -26,7 +26,7 @@ public abstract class ChessPiece extends JLabel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                System.out.println(y + "gg" + x);
+                ChessBoard.windowPos = game.getBoard().getLocationOnScreen();
                 mouseOffset = e.getPoint();
                 previousPos = getLocation();
                 game.getBoard().setTilesCircle(generateMoves());
@@ -39,9 +39,9 @@ public abstract class ChessPiece extends JLabel {
             public void mouseReleased(MouseEvent e ){
                 Point newLocation = e.getLocationOnScreen();
                 // Snap the child component to the nearest square
-                int x = roundUpX(newLocation.x) /  50;
-                int y = roundUpY(newLocation.y) / 45;
-                if(newLocation.x > 400 || newLocation.x<0 || newLocation.y>380 || newLocation.y<0){
+                int x = roundUpX(newLocation.x - ChessBoard.windowPos.x) /  50;
+                int y = roundUpY(newLocation.y -ChessBoard.windowPos.y) / 45;
+                if(newLocation.x - ChessBoard.windowPos.x> 400 || newLocation.x<0 || newLocation.y - ChessBoard.windowPos.y>380 || newLocation.y<0){
                     setLocation(previousPos);
                 }
                 else {
@@ -68,8 +68,9 @@ public abstract class ChessPiece extends JLabel {
             @Override
             public void mouseDragged(MouseEvent e) {
                 // Calculate the new position of the child component
+                Point mousePos = MouseInfo.getPointerInfo().getLocation();
                 Point newLocation = e.getLocationOnScreen();
-                newLocation.translate(-mouseOffset.x-5, -mouseOffset.y-20);
+                newLocation.translate(-mouseOffset.x-5 - ChessBoard.windowPos.x, -mouseOffset.y-20 - ChessBoard.windowPos.y);
                 setLocation(newLocation);
                 checkKingThreat();
 
